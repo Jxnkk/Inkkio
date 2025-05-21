@@ -9,7 +9,7 @@ function App() {
   const [scale, setScale] = useState(1);
 
   const MIN_SCALE = 0.5;
-  const MAX_SCALE = 5;
+  const MAX_SCALE = 25;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -123,13 +123,32 @@ function App() {
       />
       <iframe
         className="soundcloud-player"
-        width="300"
-        height="100"
         scrolling="no"
         frameBorder="no"
         allow="autoplay"
         src="https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F1768727658&show_artwork=true"
-      ></iframe>
+      >
+      </iframe>
+      <div
+        className="soundcloud-search"
+      >
+      </div>
+      <div 
+        className="editing"
+      >
+      </div>
+      <div 
+        className="timer"
+      >
+      </div>
+      <button
+        className="undo"
+      >
+      </button>
+          <button
+        className="redo"
+      >
+      </button>
     </div>
   );
 }
