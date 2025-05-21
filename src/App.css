@@ -1,6 +1,25 @@
 body {
-    background: transparent;
-    overflow-y: hidden;
-    overflow-x: hidden; 
-    padding: 2.5px
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.whiteboard {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  cursor: crosshair;
+  border: none;
+}
+
+.soundcloud-player {
+  width: 25%;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  margin: 10px;
 }
