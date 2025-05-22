@@ -4,11 +4,12 @@ import "./App.css";
 function App() {
   const gridCanvasRef = useRef(null);
   const drawCanvasRef = useRef(null);
-  const [mode, setMode] = useState("draw"); 
+  const [mode, setMode] = useState("draw");
   const pathsRef = useRef([]);
   const [currentPath, setCurrentPath] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [scale, setScale] = useState(1);
+  const offsetRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 }); // Center offset
 
   const MIN_SCALE = 0.5;
   const MAX_SCALE = 25;
@@ -21,6 +22,10 @@ function App() {
         canvas.width = width;
         canvas.height = height;
       });
+
+      // Keep offset centered on canvas
+      offsetRef.current = { x: width / 2, y: height / 2 };
+
       drawGrid();
       drawAllPaths();
     };
@@ -41,8 +46,8 @@ function App() {
 
     ctx.save();
 
-    const offsetX = canvas.width / 2;
-    const offsetY = canvas.height / 2;
+    const offsetX = offsetRef.current.x;
+    const offsetY = offsetRef.current.y;
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
 
@@ -53,6 +58,7 @@ function App() {
     const limitX = canvas.width / scale;
     const limitY = canvas.height / scale;
 
+    // Draw vertical lines
     for (let x = -limitX; x < limitX; x += step) {
       ctx.beginPath();
       ctx.moveTo(x, -limitY);
@@ -60,6 +66,7 @@ function App() {
       ctx.stroke();
     }
 
+    // Draw horizontal lines
     for (let y = -limitY; y < limitY; y += step) {
       ctx.beginPath();
       ctx.moveTo(-limitX, y);
@@ -81,8 +88,8 @@ function App() {
 
     ctx.save();
 
-    const offsetX = canvas.width / 2;
-    const offsetY = canvas.height / 2;
+    const offsetX = offsetRef.current.x;
+    const offsetY = offsetRef.current.y;
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
 
@@ -121,11 +128,17 @@ function App() {
     drawAllPaths();
   }, [currentPath, scale]);
 
+  // Also redraw whenever scale changes explicitly
+  useEffect(() => {
+    drawGrid();
+    drawAllPaths();
+  }, [scale]);
+
   const getMousePos = (e) => {
     const rect = drawCanvasRef.current.getBoundingClientRect();
     return {
-      x: (e.clientX - rect.left - drawCanvasRef.current.width / 2) / scale,
-      y: (e.clientY - rect.top - drawCanvasRef.current.height / 2) / scale,
+      x: (e.clientX - rect.left - offsetRef.current.x) / scale,
+      y: (e.clientY - rect.top - offsetRef.current.y) / scale,
     };
   };
 
@@ -150,11 +163,18 @@ function App() {
     setIsDrawing(false);
   };
 
+  // Zoom on center of screen only, no pan offset change
   const handleWheel = (e) => {
     e.preventDefault();
+
     let newScale = scale - e.deltaY * 0.001;
     newScale = Math.min(Math.max(newScale, MIN_SCALE), MAX_SCALE);
+
     setScale(newScale);
+
+    // Immediate redraw to avoid lag
+    drawGrid();
+    drawAllPaths();
   };
 
   return (
@@ -174,9 +194,15 @@ function App() {
         onWheel={handleWheel}
       />
       <div className="editing">
-        <button onClick={() => setMode("draw")}><img src="pencil-Stroke-Rounded.png" alt="pencil"></img></button>
-        <button onClick={() => setMode("erase")}><img src="eraser-Stroke-Rounded.png" alt="eraser"></img></button>
-        <button onClick={() => setMode("highlight")}><img src="highlighter-Stroke-Rounded.png" alt="highlighter"></img></button>
+        <button onClick={() => setMode("draw")}>
+          <img src="pencil-Stroke-Rounded.png" alt="pencil" />
+        </button>
+        <button onClick={() => setMode("erase")}>
+          <img src="eraser-Stroke-Rounded.png" alt="eraser" />
+        </button>
+        <button onClick={() => setMode("highlight")}>
+          <img src="highlighter-Stroke-Rounded.png" alt="highlighter" />
+        </button>
       </div>
     </div>
   );
