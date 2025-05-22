@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 function App() {
-  const canvasRef = useRef(null);
+  const gridCanvasRef = useRef(null);
+  const drawCanvasRef = useRef(null);
+  const [mode, setMode] = useState("draw"); 
   const pathsRef = useRef([]);
   const [currentPath, setCurrentPath] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -12,54 +14,97 @@ function App() {
   const MAX_SCALE = 25;
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    drawAll();
+    const resizeCanvases = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      [gridCanvasRef.current, drawCanvasRef.current].forEach((canvas) => {
+        canvas.width = width;
+        canvas.height = height;
+      });
+      drawGrid();
+      drawAllPaths();
+    };
+
+    resizeCanvases();
+    window.addEventListener("resize", resizeCanvases);
+    return () => window.removeEventListener("resize", resizeCanvases);
   }, []);
 
-  const drawAll = () => {
-    const canvas = canvasRef.current;
+  // Draw grid on bottom canvas
+  const drawGrid = () => {
+    const canvas = gridCanvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
 
     const offsetX = canvas.width / 2;
     const offsetY = canvas.height / 2;
-    ctx.translate(offsetX, offsetY); // Center origin
+    ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
 
-    // Draw grid lines
-    const step = 75;
     ctx.strokeStyle = "#e0e0e0";
     ctx.lineWidth = 1 / scale;
 
-    const gridLimitX = canvas.width / scale;
-    const gridLimitY = canvas.height / scale;
+    const step = 75;
+    const limitX = canvas.width / scale;
+    const limitY = canvas.height / scale;
 
-    for (let x = -gridLimitX; x < gridLimitX; x += step) {
+    for (let x = -limitX; x < limitX; x += step) {
       ctx.beginPath();
-      ctx.moveTo(x, -gridLimitY);
-      ctx.lineTo(x, gridLimitY);
+      ctx.moveTo(x, -limitY);
+      ctx.lineTo(x, limitY);
       ctx.stroke();
     }
 
-    for (let y = -gridLimitY; y < gridLimitY; y += step) {
+    for (let y = -limitY; y < limitY; y += step) {
       ctx.beginPath();
-      ctx.moveTo(-gridLimitX, y);
-      ctx.lineTo(gridLimitX, y);
+      ctx.moveTo(-limitX, y);
+      ctx.lineTo(limitX, y);
       ctx.stroke();
     }
 
-    // Draw all paths
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2 / scale;
+    ctx.restore();
+  };
+
+  // Draw all paths on top canvas
+  const drawAllPaths = () => {
+    const canvas = drawCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+
+    const offsetX = canvas.width / 2;
+    const offsetY = canvas.height / 2;
+    ctx.translate(offsetX, offsetY);
+    ctx.scale(scale, scale);
 
     [...pathsRef.current, currentPath].forEach((path) => {
       if (path.length < 2) return;
+
+      const pathType = path[0]?.type || "draw";
+
+      if (pathType === "erase") {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.lineWidth = 15 / scale;
+        ctx.strokeStyle = "rgba(0,0,0,1)";
+      } else if (pathType === "highlight") {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = "rgba(255, 255, 0, 0.3)";
+        ctx.lineWidth = 10 / scale;
+      } else {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2 / scale;
+      }
+
       ctx.beginPath();
       ctx.moveTo(path[0].x, path[0].y);
       for (let i = 1; i < path.length; i++) {
@@ -71,24 +116,30 @@ function App() {
     ctx.restore();
   };
 
+  useEffect(() => {
+    drawGrid();
+    drawAllPaths();
+  }, [currentPath, scale]);
+
   const getMousePos = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
+    const rect = drawCanvasRef.current.getBoundingClientRect();
     return {
-      x: (e.clientX - rect.left - canvasRef.current.width / 2) / scale,
-      y: (e.clientY - rect.top - canvasRef.current.height / 2) / scale,
+      x: (e.clientX - rect.left - drawCanvasRef.current.width / 2) / scale,
+      y: (e.clientY - rect.top - drawCanvasRef.current.height / 2) / scale,
     };
   };
 
+  // Drawing event handlers
   const startDrawing = (e) => {
     setIsDrawing(true);
     const pos = getMousePos(e);
-    setCurrentPath([pos]);
+    setCurrentPath([{ ...pos, type: mode }]);
   };
 
   const draw = (e) => {
     if (!isDrawing) return;
     const pos = getMousePos(e);
-    setCurrentPath((prev) => [...prev, pos]);
+    setCurrentPath((prev) => [...prev, { ...pos, type: mode }]);
   };
 
   const endDrawing = () => {
@@ -98,10 +149,6 @@ function App() {
     }
     setIsDrawing(false);
   };
-
-  useEffect(() => {
-    drawAll();
-  }, [currentPath, scale]);
 
   const handleWheel = (e) => {
     e.preventDefault();
@@ -113,42 +160,24 @@ function App() {
   return (
     <div>
       <canvas
-        ref={canvasRef}
-        className="whiteboard"
+        ref={gridCanvasRef}
+        className="grid-layer"
+        style={{ pointerEvents: "none" }}
+      />
+      <canvas
+        ref={drawCanvasRef}
+        className="drawing-layer"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={endDrawing}
         onMouseLeave={endDrawing}
         onWheel={handleWheel}
       />
-      <iframe
-        className="soundcloud-player"
-        scrolling="no"
-        frameBorder="no"
-        allow="autoplay"
-        src="https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F1768727658&show_artwork=true"
-      >
-      </iframe>
-      <div
-        className="soundcloud-search"
-      >
+      <div className="editing">
+        <button onClick={() => setMode("draw")}><img src="pencil-Stroke-Rounded.png" alt="pencil"></img></button>
+        <button onClick={() => setMode("erase")}><img src="eraser-Stroke-Rounded.png" alt="eraser"></img></button>
+        <button onClick={() => setMode("highlight")}><img src="highlighter-Stroke-Rounded.png" alt="highlighter"></img></button>
       </div>
-      <div 
-        className="editing"
-      >
-      </div>
-      <div 
-        className="timer"
-      >
-      </div>
-      <button
-        className="undo"
-      >
-      </button>
-          <button
-        className="redo"
-      >
-      </button>
     </div>
   );
 }

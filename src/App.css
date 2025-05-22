@@ -1,66 +1,36 @@
-body {
-  position: relative;
+.grid-layer,
+.drawing-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
 }
 
-.whiteboard {
-  width: 100vw;
-  height: 100vh;
-  display: block;
+.grid-layer {
+  z-index: 1;
+  pointer-events: none; 
+}
+
+.drawing-layer {
+  z-index: 2;
   cursor: crosshair;
-  border: none;
-}
-
-.soundcloud-player, .soundcloud-search, .timer, .editing, .redo, .undo {
-  position: absolute;
-  z-index: 10;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-  margin: 5px;
-}
-
-.soundcloud-player, .soundcloud-search, .timer, .editing {
-  width: 20%;
-  right: 10px;
 }
 
 .editing {
-  width: 2.5%;
-  height: 70%;
-  left: 10px;
-  top: 10%;
-  background-color: white;
-}
-
-.redo, .undo {
-  width: 2.5%;
-  height: 5%;
-  left: 10px;
-  background-color: white;
-  border: 0;
-}
-
-.redo {
-  top: 82.5%;
-}
-
-.undo {
-  top: 90%;
-}
-
-.timer {
-  top: 10%;
-  height: 10%;
-}
-
-.soundcloud-search {
-  top: 22.5%;
-  height: 20%;
-}
-
-.soundcloud-player {
-  top: 45%;
-  height: 50%;
+  position: fixed;
+  top: 85%;
+  left: 42.5%;
+  width: 15%;
+  height: 7.5%;
+  padding: 10px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.5); 
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
