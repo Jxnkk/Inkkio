@@ -17,20 +17,49 @@
   cursor: crosshair;
 }
 
-.editing {
+.editing, .search-results, .soundcloud-player{
   position: fixed;
-  top: 85%;
-  left: 42.5%;
-  width: 15%;
-  height: 7.5%;
   padding: 10px;
   z-index: 10;
   background: rgba(255, 255, 255, 0.5); 
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.editing {
+  top: 85%;
+  left: 42.5%;
+  width: 15%;
+  height: 7.5%;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 15px;
 }
+
+.search-results {
+  top: 10px;
+  right: 10px;
+  width: 20%;
+  height: 37.5%;
+  position: fixed; 
+  overflow-y: auto;
+}
+
+.soundcloud-player {
+  top: 45%;
+  right: 10px;
+  width: 20%;
+  height: 50%;
+}
+
+
+textarea {
+  width: 100%;
+}
+
+.cover-image {
+  width: 50%;
+}
+

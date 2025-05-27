@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import "./App.css";
 
 function App() {
@@ -9,10 +10,55 @@ function App() {
   const [currentPath, setCurrentPath] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [scale, setScale] = useState(1);
-  const offsetRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 }); // Center offset
+  const offsetRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 }); 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [embedCode, setEmbedCode] = useState("");
 
   const MIN_SCALE = 0.5;
   const MAX_SCALE = 25;
+
+  const API_KEY = "AIzaSyBJcLNXS5KazHLCV2yjNkpaDGOGgdLuy-U";
+  const api_key = "367fc2e9522cccbe43d012";
+  const CX = "c7b07b8214c624a79";
+
+  const handleSearch = async (query) => {
+    if (!searchQuery.trim()) return;
+
+    try {
+      const response = await axios.get("https://www.googleapis.com/customsearch/v1", {
+        params: {
+          key: API_KEY, 
+          cx: CX,
+          q: `${searchQuery} soundcloud song`,  
+        },
+      });
+      setSearchResults(response.data.items || []);
+      console.log("Full search response:", response.data);
+    }
+    catch {
+      console.log("No successful search")
+    }
+  };
+
+  const fetchEmbedCode = async (url) => {
+    try {
+      const response = await axios.get(`https://cdn.iframe.ly/api/iframely?url=${url}&key=${api_key}&iframe=1&omit_script=1`);
+      setEmbedCode(response.data.html);
+      console.log(embedCode);
+    } 
+    catch (error) {
+      console.error("Error fetching embed code:", error);
+    }
+  };
+
+  const handleResultClick = (url) => {
+    fetchEmbedCode(url);
+  };
+
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
   useEffect(() => {
     const resizeCanvases = () => {
@@ -23,7 +69,6 @@ function App() {
         canvas.height = height;
       });
 
-      // Keep offset centered on canvas
       offsetRef.current = { x: width / 2, y: height / 2 };
 
       drawGrid();
@@ -35,7 +80,6 @@ function App() {
     return () => window.removeEventListener("resize", resizeCanvases);
   }, []);
 
-  // Draw grid on bottom canvas
   const drawGrid = () => {
     const canvas = gridCanvasRef.current;
     if (!canvas) return;
@@ -58,7 +102,6 @@ function App() {
     const limitX = canvas.width / scale;
     const limitY = canvas.height / scale;
 
-    // Draw vertical lines
     for (let x = -limitX; x < limitX; x += step) {
       ctx.beginPath();
       ctx.moveTo(x, -limitY);
@@ -66,7 +109,6 @@ function App() {
       ctx.stroke();
     }
 
-    // Draw horizontal lines
     for (let y = -limitY; y < limitY; y += step) {
       ctx.beginPath();
       ctx.moveTo(-limitX, y);
@@ -77,7 +119,6 @@ function App() {
     ctx.restore();
   };
 
-  // Draw all paths on top canvas
   const drawAllPaths = () => {
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
@@ -128,7 +169,6 @@ function App() {
     drawAllPaths();
   }, [currentPath, scale]);
 
-  // Also redraw whenever scale changes explicitly
   useEffect(() => {
     drawGrid();
     drawAllPaths();
@@ -142,7 +182,6 @@ function App() {
     };
   };
 
-  // Drawing event handlers
   const startDrawing = (e) => {
     setIsDrawing(true);
     const pos = getMousePos(e);
@@ -163,7 +202,6 @@ function App() {
     setIsDrawing(false);
   };
 
-  // Zoom on center of screen only, no pan offset change
   const handleWheel = (e) => {
     e.preventDefault();
 
@@ -172,11 +210,10 @@ function App() {
 
     setScale(newScale);
 
-    // Immediate redraw to avoid lag
     drawGrid();
     drawAllPaths();
   };
-
+  
   return (
     <div>
       <canvas
@@ -203,6 +240,52 @@ function App() {
         <button onClick={() => setMode("highlight")}>
           <img src="highlighter-Stroke-Rounded.png" alt="highlighter" />
         </button>
+      </div>
+      <div className="search-results">
+        <input
+          type="text"
+          className="searchBox"
+          value={searchQuery}
+          onChange={handleInputChange} 
+          placeholder="Search for a song or playlist"
+        />
+        <button onClick={handleSearch}>Search</button>
+        {searchResults.length > 0 && (
+        <div className="searchResultsContainer">
+          <h3>Search Results:</h3>
+          <div className="searchList">
+            {searchResults.map((result, index) => (
+              <div key={index} className="searchItem">
+                {result.pagemap?.cse_image && result.pagemap.cse_image[0] ? (
+                <img
+                  src={result.pagemap.cse_image[0].src}
+                  alt="cover"
+                  className="cover-image"
+                />
+                ) : (
+                  <div className="noImage">No Image</div>
+                )}
+                <div className="songInfo">
+                    <a href={result.link} target="_blank" rel="noopener noreferrer"                    
+                    onClick={(e) => {
+                      e.preventDefault(); 
+                      handleResultClick(result.link); 
+                    }}>
+                    <h4>{result.title}</h4>
+                    </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      </div>
+      <div>
+        <iframe
+          className="soundcloud-player"
+          src={embedCode ? embedCode : "https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F222896338&show_artwork=true"}
+          allowFullScreen
+        />
       </div>
     </div>
   );
