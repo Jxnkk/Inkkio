@@ -19,34 +19,49 @@ function App() {
   const MAX_SCALE = 25;
 
   const API_KEY = "AIzaSyBJcLNXS5KazHLCV2yjNkpaDGOGgdLuy-U";
-  const api_key = "367fc2e9522cccbe43d012";
+  const my_key = "367fc2e9522cccbe43d012";
   const CX = "c7b07b8214c624a79";
 
-  const handleSearch = async (query) => {
-    if (!searchQuery.trim()) return;
+  const handleSearch = async (searchQuery) => {
+  try {
+    const response = await axios.get("https://www.googleapis.com/customsearch/v1", {
+      params: {
+        key: API_KEY,
+        cx: CX,
+        q: `${searchQuery} song`,
+      },
+    });
+    const allResults = response.data.items || [];
+    const trackLinks = [];
 
-    try {
-      const response = await axios.get("https://www.googleapis.com/customsearch/v1", {
-        params: {
-          key: API_KEY, 
-          cx: CX,
-          q: `${searchQuery} soundcloud song`,  
-        },
-      });
-      setSearchResults(response.data.items || []);
-      console.log("Full search response:", response.data);
-    }
-    catch {
-      console.log("No successful search")
+    for (const item of allResults) {
+      const url = item.link;
+      console.log(item);
+      const splitUrl = url.split("/");
+      if(splitUrl.length == 5){
+        trackLinks.push(item);
+      }
+    setSearchResults(trackLinks);
+    console.log("Filtered track links:", trackLinks);
+    }} catch (error) {
+      console.log("No successful search", error);
     }
   };
 
-  const fetchEmbedCode = async (url) => {
+  const fetchEmbedCode = async (my_url) => {
     try {
-      const response = await axios.get(`https://cdn.iframe.ly/api/iframely?url=${url}&key=${api_key}&iframe=1&omit_script=1`);
-      setEmbedCode(response.data.html);
-      console.log(embedCode);
-    } 
+      const response = await axios.get("https://iframe.ly/api/iframely", {
+        params: {
+          url: my_url,
+          api_key: my_key
+        },
+      });
+      console.log("Requested URL:", my_url);
+      const data = response.data;
+      const embedUrl = data.links.player[0].href;
+      console.log(embedUrl);
+      setEmbedCode(embedUrl);
+    }
     catch (error) {
       console.error("Error fetching embed code:", error);
     }
