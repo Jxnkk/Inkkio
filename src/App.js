@@ -22,13 +22,15 @@ function App() {
   const my_key = "367fc2e9522cccbe43d012";
   const CX = "c7b07b8214c624a79";
 
-  const handleSearch = async (searchQuery) => {
+  const handleSearch = async () => {
+  console.log("search", searchQuery);
+
   try {
     const response = await axios.get("https://www.googleapis.com/customsearch/v1", {
       params: {
         key: API_KEY,
         cx: CX,
-        q: `${searchQuery} song`,
+        q: `site:soundcloud.com ${searchQuery}`,
       },
     });
     const allResults = response.data.items || [];
@@ -37,13 +39,15 @@ function App() {
     for (const item of allResults) {
       const url = item.link;
       console.log(item);
-      const splitUrl = url.split("/");
-      if(splitUrl.length == 5){
+      const splitURL = url.split("/");
+      if(splitURL.length >= 5){
         trackLinks.push(item);
       }
+    }
+
     setSearchResults(trackLinks);
     console.log("Filtered track links:", trackLinks);
-    }} catch (error) {
+    } catch (error) {
       console.log("No successful search", error);
     }
   };
