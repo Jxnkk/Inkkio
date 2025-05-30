@@ -61,22 +61,22 @@ export default function SoundCloud(){
     }
 
     return(
-        <div className = "soundCloud">
-            <div className = "searchBox">
-                <input className = "searchText" value = {searchQuery} onChange = {e => updateSearchQuery(e.target.value)} placeholder = "Enter a song or playlist"></input>
-                <button className = "searchButton" onClick = {getSearchQuery}> Search </button>
-                <div className = "searchResults">
+        <div id = "soundCloud">
+            <div id = "searchBox">
+                <input id = "searchText" value = {searchQuery} onChange = {e => updateSearchQuery(e.target.value)} placeholder = "Enter a song or playlist"></input>
+                <button id = "searchButton" onClick = {getSearchQuery}> Search </button>
+                <div id = "searchResults">
                     <h1> Search Results </h1>
-                    <div className="searchList">
+                    <div id = "searchList">
                         {searchResults.map((result, index) => (
-                        <div key = {index} className = "searchItem">
+                        <div key = {index} id = "searchItem">
                             <img
-                                src={result.pagemap.cse_image[0].src}
-                                alt="cover"
-                                className="cover-image"
+                                src = {result.pagemap.cse_image[0].src}
+                                alt = "cover"
+                                id = "cover-image"
                             />
-                            <div className="songInfo">
-                                <a href={result.link} target="_blank" rel="noopener noreferrer" onClick = {e => {e.preventDefault(); getEmbedCode(result.link);}}> {result.title} </a>
+                            <div id = "songInfo">
+                                <a href = {result.link} target = "_blank" rel = "noopener noreferrer" onClick = {e => {e.preventDefault(); getEmbedCode(result.link);}}> {result.title} </a>
                             </div>
                         </div>
                         ))}
