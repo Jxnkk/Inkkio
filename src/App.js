@@ -7,9 +7,9 @@ import WhiteBoard from "./components/Whiteboard.js"
 export default function App() {
   return (
     <>
-      <WhiteBoard/>
-      <Clock/>
-      <SoundCloud/>
+      <WhiteBoard id = "whiteboard"/>
+      <Clock id = "clock"/>
+      <SoundCloud id = "soundcloud"/>
     </>
   )
 }
