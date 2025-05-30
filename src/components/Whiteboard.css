@@ -4,9 +4,8 @@
     height: 100%;
 }
 
-#editingTools, #mainTools {
+#editingTools, #mainTools, .floatingWidgets {
     position: fixed; 
-    left: 20px;
     display: flex;
     gap: 15px;
     padding: 12px;
@@ -19,10 +18,20 @@
 
 #editingTools {
     top: 25%;
+    left: 20px;
+
 }
 
 #mainTools {
+    top: 5%;    
+    left: 20px;
+}
+
+.floatingWidgets {
     top: 5%;
+    right: 20px;
+    height: 85%;
+    width: 20%;
 }
 
 #editingTools button, #mainTools button {
@@ -39,3 +48,4 @@
     margin-top: 1px;
     margin-bottom: 1px;
 }
+
