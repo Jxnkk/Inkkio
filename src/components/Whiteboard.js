@@ -19,6 +19,8 @@ export default function WhiteBoard() {
     const [isHighlighting, setIsHighlighting] = useState(false);
     const [strokeColor, setStrokeColor] = useState("#000000");
     const [strokeSize, setStrokeSize] = useState(5);
+    const [isSoundCloudOpen, setIsSoundCloudOpen] = useState(false);
+    const [isClockOpen, setIsClockOpen] = useState(false);
 
     //Effect to initialize the fabric canvas and set up the dots in the grid background
     useEffect(() => {
@@ -216,14 +218,14 @@ export default function WhiteBoard() {
                 <button onClick = {() => {setIsDrawing(!isDrawing); setIsErasingStroke(false); setIsErasingArea(false); setIsHighlighting(false)}}>
                     <img src = "pencil-Stroke-Rounded.png" alt = "pencil"/>
                 </button>
+                <button onClick = {() => {setIsHighlighting(!isHighlighting); setIsDrawing(false); setIsErasingArea(false); setIsErasingStroke(false)}}>
+                    <img src = "highlighter-Stroke-Rounded.png" alt = "highlighter"/>
+                </button>
                 <button onClick = {() => {setIsErasingStroke(!isErasingStroke); setIsDrawing(false); setIsErasingArea(false); setIsHighlighting(false)}}>
                     <img src = "eraser-Stroke-Rounded.png" alt = "eraser"/>
                 </button>
                 <button onClick = {() => {setIsErasingArea(!isErasingArea); setIsDrawing(false); setIsErasingStroke(false); setIsHighlighting(false)}}>
                     <img src = "eraser-area-Stroke-Rounded.png" alt = "eraser"/>
-                </button>
-                <button onClick = {() => {setIsHighlighting(!isHighlighting); setIsDrawing(false); setIsErasingArea(false); setIsErasingStroke(false)}}>
-                    <img src = "highlighter-Stroke-Rounded.png" alt = "highlighter"/>
                 </button>
                 <hr></hr>
                 {/*Line break to seperate color picker and size changer from erasing and drawing options*/}

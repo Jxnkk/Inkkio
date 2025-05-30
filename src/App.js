@@ -6,7 +6,7 @@ import WhiteBoard from "./components/Whiteboard.js"
 export default function App() {
   return (
     <>
-      //Call the whiteboard component to render it
+      {/*Call the whiteboard component to render it*/}
       <WhiteBoard id = "whiteboard"/>
     </>
   )
