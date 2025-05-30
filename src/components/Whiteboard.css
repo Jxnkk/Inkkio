@@ -4,9 +4,8 @@
     height: 100%;
 }
 
-#editingTools {
+#editingTools, #mainTools {
     position: fixed; 
-    top: 22.5%;
     left: 20px;
     display: flex;
     gap: 15px;
@@ -18,13 +17,21 @@
     z-index: 2;
 }
 
-#editingTools button {
+#editingTools {
+    top: 25%;
+}
+
+#mainTools {
+    top: 5%;
+}
+
+#editingTools button, #mainTools button {
     background: none;
     border: none;
     cursor: pointer;
 }
 
-#editingTools hr {
+#editingTools hr, #mainTools hr {
     height: 1px;
     width: 80%; 
     background-color: #000000;

@@ -8,8 +8,6 @@ export default function App() {
   return (
     <>
       <WhiteBoard id = "whiteboard"/>
-      <Clock id = "clock"/>
-      <SoundCloud id = "soundcloud"/>
     </>
   )
 }

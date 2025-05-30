@@ -1,10 +1,18 @@
+//Imports useEffect, useState, useRef from React to detect state changes and re-render components 
 import { useEffect, useState, useRef } from "react";
+//Importing items from frabic.js to use in the whiteboard 
 import { Canvas, Circle, PencilBrush, Textbox, Rect, Group } from "fabric";
+//Importing CSS file for styling the whiteboard
 import "./Whiteboard.css";
+//Importing components for the whiteboard 
+import SoundCloud from "./SoundCloud";  
+import clock from "./Clock";
 
 export default function WhiteBoard() {
+    //Creating references to the canvas and fabric canvas elements
     const canvasRef = useRef(null);
     const fabricCanvasRef = useRef(null);
+    //State variables to manage the drawing, erasing, highlighting, and stroke properties
     const [isDrawing, setIsDrawing] = useState(false);
     const [isErasingStroke, setIsErasingStroke] = useState(false);
     const [isErasingArea, setIsErasingArea] = useState(false);
@@ -12,6 +20,7 @@ export default function WhiteBoard() {
     const [strokeColor, setStrokeColor] = useState("#000000");
     const [strokeSize, setStrokeSize] = useState(5);
 
+    //Effect to initialize the fabric canvas and set up the dots in the grid background
     useEffect(() => {
         const fabricCanvas = new Canvas(canvasRef.current, {
             isDrawingMode: false,
@@ -20,6 +29,7 @@ export default function WhiteBoard() {
             subTargetCheck: true,
         });
 
+        //Fabric canvas is 3x bigger than the window to allow for zoom in and out 
         fabricCanvasRef.current = fabricCanvas;
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -32,15 +42,17 @@ export default function WhiteBoard() {
             fabricCanvas.add(dot);
             }
         }
+
         fabricCanvas.setZoom(1);
         fabricCanvas.absolutePan({x: canvasWidth/2 - width/2, y: canvasHeight/2 - height/2});
         fabricCanvas.renderAll();
     }, []);
 
+    //Effect to resize the canvas when the window is resized
     useEffect(() => {
         function resizeCanvas() {
             const fabricCanvas = fabricCanvasRef.current;
-            if (fabricCanvas) {
+            if(fabricCanvas){
                 fabricCanvas.setWidth(window.innerWidth);
                 fabricCanvas.setHeight(window.innerHeight);
                 fabricCanvas.renderAll();
@@ -50,14 +62,13 @@ export default function WhiteBoard() {
         window.addEventListener("resize", resizeCanvas);
     }, []);
 
-    useEffect(() => {
-        console.log("Drawing mode:", isDrawing);
-        console.log("Erasing stroke mode:", isErasingStroke);
-        console.log("Erasing area mode:", isErasingArea);
-        console.log("Highlighting mode:", isHighlighting);      
+    //Effect to handle drawing, erasing, and highlighting on the canvas
+    //This effect runs whenever the drawing, erasing, highlighting state or stroke properties change
+    useEffect(() => {   
         const fabricCanvas = fabricCanvasRef.current;
         if (!fabricCanvas || (!isDrawing && !isHighlighting && !isErasingStroke && !isErasingArea)) return;
 
+        //Drawing follows users mouse pointer
         if(isDrawing){
             fabricCanvas.isDrawingMode = true;
             fabricCanvas.freeDrawingBrush = new PencilBrush(fabricCanvas);
@@ -65,6 +76,7 @@ export default function WhiteBoard() {
             fabricCanvas.freeDrawingBrush.width = strokeSize;
             fabricCanvas.freeDrawingBrush.density = 1000; 
         } 
+        //Eraser will detect objects under the mouse pointer and remove them if they are paths or path-groups
         else if(isErasingStroke){
             fabricCanvas.isDrawingMode = false; 
             const eraseHandler = (event) => {
@@ -83,6 +95,7 @@ export default function WhiteBoard() {
                 fabricCanvas.off("mouse:move", eraseHandler);
             };
         } 
+        //Eraser will white-out the area under the mouse pointer
         else if(isErasingArea){
             fabricCanvas.isDrawingMode = true;
             fabricCanvas.freeDrawingBrush = new PencilBrush(fabricCanvas);
@@ -90,6 +103,7 @@ export default function WhiteBoard() {
             fabricCanvas.freeDrawingBrush.width = strokeSize * 2;
             fabricCanvas.freeDrawingBrush.density = 1000; 
         }
+        //Highlighter will follow the mouse pointer and highlight the area under it
         else if(isHighlighting){
             fabricCanvas.isDrawingMode = true;
             fabricCanvas.freeDrawingBrush = new PencilBrush(fabricCanvas);
@@ -99,10 +113,12 @@ export default function WhiteBoard() {
         fabricCanvas.renderAll();
     }, [isDrawing, isErasingStroke, isErasingArea, isHighlighting, strokeColor, strokeSize]);
 
+    //Function to add a textbox to the canvas
     function addTextbox() {
         const fabricCanvas = fabricCanvasRef.current;
         if (!fabricCanvas) return;
         const handleMouseDown = (opt) => {
+            //Creates a textbox at the mouse pointer position with default text and allows editing
             const pointer = fabricCanvas.getPointer(opt.e);
             const textbox = new Textbox("Tap to edit", {
                 left: pointer.x - 75,
@@ -112,6 +128,7 @@ export default function WhiteBoard() {
                 fill: "#000000",
                 editable: true,
             });
+            //Adds textbox to the canvas and sets it as the active object
             fabricCanvas.add(textbox);
             fabricCanvas.setActiveObject(textbox);
             fabricCanvas.renderAll();
@@ -120,11 +137,13 @@ export default function WhiteBoard() {
         fabricCanvas.on("mouse:down", handleMouseDown);
     }
 
+    //Function to add a sticky note to the whiteboard
     function addStickyNote() {
         const fabricCanvas = fabricCanvasRef.current;
         if (!fabricCanvas) return;
         const handleMouseDown = (opt) => {
             const pointer = fabricCanvas.getPointer(opt.e);
+            //Creates a rectangle and a textbox to form a sticky note
             const rectangle = new Rect({
                 left: 0,
                 top: 0,
@@ -145,6 +164,7 @@ export default function WhiteBoard() {
                 editable: true,
                 selectable: true,
             });
+            //Sticky note is a group of rectangle and textbox
             const stickynote = new Group([rectangle, textbox], {
                 left: pointer.x - 75,
                 top: pointer.y - 50,
@@ -153,6 +173,7 @@ export default function WhiteBoard() {
                 selectable: true,
                 evented: true,
             });
+            //Adds the sticky note to the canvas and sets it as the active object
             fabricCanvas.add(stickynote);
             fabricCanvas.setActiveObject(stickynote);
             fabricCanvas.isDrawingMode = false;
@@ -162,6 +183,7 @@ export default function WhiteBoard() {
         fabricCanvas.on("mouse:down", handleMouseDown);
     }
 
+    //Initialize the color picker using Webix UI
     useEffect(() => {
         window.webix.ui({
             view: "colorpicker",
@@ -178,7 +200,19 @@ export default function WhiteBoard() {
     return(
         <div id = "whiteboard">
             <canvas id = "canvas" ref = {canvasRef}></canvas>
+            {/*Buttons for soundcloud player and pomodoro timer*/}
+            <div id = "mainTools">
+                <button>
+                    {/*Image to represent the button and alt in case image isn't visible*/}
+                    <img src = "music-Stroke-Rounded.png" alt = "soundcloud pkayer"/>
+                </button>
+                <button>
+                    <img src = "timer-Stroke-Rounded.png" alt = "pomodoro timer"/>
+                </button>
+            </div>
+            {/*Buttons for editing tools*/}
             <div id = "editingTools">
+                {/*On click, variable for respective said method is set to True so React knows what to do*/}
                 <button onClick = {() => {setIsDrawing(!isDrawing); setIsErasingStroke(false); setIsErasingArea(false); setIsHighlighting(false)}}>
                     <img src = "pencil-Stroke-Rounded.png" alt = "pencil"/>
                 </button>
@@ -192,6 +226,7 @@ export default function WhiteBoard() {
                     <img src = "highlighter-Stroke-Rounded.png" alt = "highlighter"/>
                 </button>
                 <hr></hr>
+                {/*Line break to seperate color picker and size changer from erasing and drawing options*/}
                 <button id = "colorpicker_container"></button>
                 <button onClick = {() => {setStrokeSize(Math.min(25, strokeSize + 5))}}>
                     <img src = "pen-add-Stroke-Rounded.png" alt = "increase pen size"/>
@@ -200,6 +235,7 @@ export default function WhiteBoard() {
                     <img src = "pen-minus-Stroke-Rounded.png" alt = "decrease pen size"/>
                 </button>
                 <hr></hr>
+                {/*Line break for sticky notes and textbox option*/}
                 <button onClick = {() => {addStickyNote(); setIsDrawing(false); setIsErasingStroke(false); setIsErasingArea(false); setIsHighlighting(false)}}>
                     <img src = "sticky-note-Stroke-Rounded.png" alt = "sticky note"/>
                 </button>

@@ -1,16 +1,25 @@
+//Import useState to detect changes in the state and re-render components 
 import { useState } from "react";
+//Use axios to the APIs
 import axios from "axios";
+//Connecting to css file for styling 
 import "./SoundCloud.css"; 
 
 export default function SoundCloud(){
+    //Stores search query user inputs 
     const [searchQuery, setSearchQuery] = useState("");
+    //Stores the search results from the Google Custom search API
     const [searchResults, setSearchResults] = useState([]);
+    //Stores the emebed code for the song user selected 
     const [embedCode, setEmbedCode] = useState("");
 
+    //API keys for Google Custom Search and Iframely
     const google_api_key = "AIzaSyBJcLNXS5KazHLCV2yjNkpaDGOGgdLuy-U";
     const iframely_api_key = "367fc2e9522cccbe43d012";
     const google_cx = "c7b07b8214c624a79";
 
+    //Take search query from user and search for it in the Google Custom Search API limiting only to SoundCloud links
+    //Then, filter the results to only include SoundCloud tracks by checking the URL structure
     async function getSearchQuery(){
         const response = await axios.get("https://www.googleapis.com/customsearch/v1", {
         params: {
@@ -36,6 +45,7 @@ export default function SoundCloud(){
         setSearchResults(trackLinks);
     }
 
+    //Fetchs and stores the embed code for the selected song using Iframely API
     async function getEmbedCode(chosenUrl){
         try {
             const response = await axios.get("https://iframe.ly/api/iframely",{
@@ -56,17 +66,22 @@ export default function SoundCloud(){
         }
     };
 
+    //Updates the search query state when user types in the search box
     function updateSearchQuery(newSearchQuery){
         setSearchQuery(newSearchQuery);
     }
 
     return(
         <div id = "soundCloud">
+            {/*Searchbox that holds text box, search button, and results*/}
             <div id = "searchBox">
+                {/*Everytime text inside searchText changes, searchQuery is updated*/}
                 <input id = "searchText" value = {searchQuery} onChange = {e => updateSearchQuery(e.target.value)} placeholder = "Enter a song or playlist"></input>
+                {/*If search button is clicked, React will send searchQuery to Google Custom search API*/}
                 <button id = "searchButton" onClick = {getSearchQuery}> Search </button>
                 <div id = "searchResults">
                     <h1> Search Results </h1>
+                    {/*Outputs the search list out*/}
                     <div id = "searchList">
                         {searchResults.map((result, index) => (
                         <div key = {index} id = "searchItem">
@@ -83,6 +98,7 @@ export default function SoundCloud(){
                     </div>
                 </div>
             </div>
+            {/*Calls SoundCloud widget API and changes the src of embed code depending on what user wants and defaults emebed code to a study music playlist*/}
             <div className = "musicPlayer">
                 <iframe className = "soundcloud-player" src = {embedCode ? embedCode : "https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F222896338&show_artwork=true"} allowFullScreen/>
             </div>
