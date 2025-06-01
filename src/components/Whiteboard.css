@@ -40,12 +40,3 @@
     cursor: pointer;
 }
 
-#editingTools hr, #mainTools hr {
-    height: 1px;
-    width: 80%; 
-    background-color: #000000;
-    align-self: center;
-    margin-top: 1px;
-    margin-bottom: 1px;
-}
-
