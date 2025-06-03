@@ -7,6 +7,7 @@ import "./Whiteboard.css";
 //Importing components to be used in the whiteboard
 import SoundCloud from "./SoundCloud";  
 import Clock from "./Clock";                
+import { setFiles } from "@testing-library/user-event/dist/cjs/utils/index.js";
 
 export default function WhiteBoard() {
     //Creating references to the canvas and fabric canvas elements
@@ -14,14 +15,15 @@ export default function WhiteBoard() {
     const canvasRef = useRef(null); 
     const fabricCanvasRef = useRef(null);
 
-    //State variables to decide if user is the drawing, erasing, highlighting, or editing a textbox 
+    //State variables to decide if user is the drawing, erasing, highlighting, editing a textbox, or editing a shape 
     const [isDrawing, setIsDrawing] = useState(false);
     const [isErasingStroke, setIsErasingStroke] = useState(false);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const [selectedTextbox, setSelectedTextbox] = useState(null);
+    const [selectedShape, setSelectedShape] = useState(null);
+    const [selectedGroup, setSelectedGroup] = useState(null);
 
-    //State variables to manage stroke color and size
-    //Default stroke color is black and size is 5
+    //State variables to manage stroke color and size for drawing and highlighting
     const [strokeColor, setStrokeColor] = useState("#000000");
     const [strokeSize, setStrokeSize] = useState(5);
 
@@ -31,6 +33,9 @@ export default function WhiteBoard() {
     const [bold, setBold] = useState(false);
     const [italic, setItalic] = useState(false);
     const [underline, setUnderline] = useState(false);
+    const [backgroundColorInput, setBackgroundColorInput] = useState("#ffee8c");
+    const [borderColorInput, setBorderColorInput] = useState("#000000");
+    const [borderSizeInput, setBorderSizeInput] = useState(1);
 
     //State variables to manage the visibility of the SoundCloud player and clock
     const [isSoundCloudOpen, setIsSoundCloudOpen] = useState(false);
@@ -42,6 +47,7 @@ export default function WhiteBoard() {
     const [isShapes, setIsShapes] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [menuPosition, setMenuPosition] = useState({x: 0, y: 0});
+    const [menuPosition2, setMenuPosition2] = useState({x: 0, y: 0});
 
     //Effect to initialize the fabric canvas and set up the dots in the grid background
     useEffect(() => {
@@ -263,7 +269,8 @@ export default function WhiteBoard() {
                 top: pointer.y - 25,
                 radius: 25,
                 //Set the fill color to light yellow
-                fill: "#ffee8c"
+                fill: "#ffee8c",
+                editable: true
             });
             const textbox = new Textbox("Double Tap to Edit", {
                 left: pointer.x - 20,
@@ -460,7 +467,6 @@ export default function WhiteBoard() {
             const obj = fabricCanvas.getActiveObject();
             if(obj && obj.type === "textbox"){
                 setSelectedTextbox(obj);
-                console.log(fontSizeInput, strokeColorInput, bold, italic, underline);
                 const rect = obj.getBoundingRect();
                 setMenuPosition({
                     x: rect.left + rect.width / 2,
@@ -470,41 +476,37 @@ export default function WhiteBoard() {
             else{
                 setSelectedTextbox(null);
             }
+            if(obj && obj.type === "group"){
+                setSelectedGroup(obj);
+                const groupObjects = obj.getObjects();
+                const shape = groupObjects.find(o => o.type !== "textbox");
+                setSelectedShape(shape);
+                const rect = shape.getBoundingRect();
+                setMenuPosition2({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top - 40
+                });
+            }
+            else{
+                setSelectedShape(null);
+                setSelectedGroup(null);
+            }
         }
 
         fabricCanvas.on("selection:created", textEditing);
         fabricCanvas.on("selection:updated", textEditing);
         fabricCanvas.on("selection:cleared", textEditing);
+        fabricCanvas.on("object:moving", textEditing);
+        fabricCanvas.on("object:modified", textEditing);
 
         return () => {
             fabricCanvas.off("selection:created", textEditing);
             fabricCanvas.off("selection:updated", textEditing);
             fabricCanvas.off("selection:cleared", textEditing);
+            fabricCanvas.off("object:moving", textEditing);
+            fabricCanvas.off("object:modified", textEditing);
         }
     }, []);
-
-    /** 
-    useEffect(() => {
-        if(selectedTextbox){
-            selectedTextbox.set("fontSize", fontSizeInput);
-            selectedTextbox.set("fill", strokeColorInput);
-            if(bold){
-                selectedTextbox.set("fontWeight", "bold");
-            }
-            else{
-                selectedTextbox.set("fontWeight", "normal");
-            }
-            if(italic){
-                selectedTextbox.set("fontStyle", "italic");
-            }
-            else{
-                selectedTextbox.set("fontStyle", "normal");
-            }
-            selectedTextbox.set("underline", underline);
-            selectedTextbox.canvas?.requestRenderAll();
-        }
-    }, [fontSizeInput, selectedTextbox, strokeColorInput, bold, italic, underline]);
-    */
 
     //Function to turn hex to rgba generated by copilot 
     function hexToRgba(hex, alpha = 1) {
@@ -562,6 +564,54 @@ export default function WhiteBoard() {
         }, 0);
     }, [selectedTextbox]);
 
+    useEffect(() => {
+        setTimeout(() => {
+            const container = document.getElementById("colorpicker_container3");
+            if(!container){
+                return;
+            }
+            container.innerHTML = "";
+            window.webix.ui({
+                view: "colorpicker",
+                container: "colorpicker_container3",
+                value: "#ffee8c",
+                on: { 
+                    onChange: (newColor) => {
+                        setBackgroundColorInput(newColor);
+                        if(selectedShape){
+                            selectedShape.set("fill", newColor);
+                            selectedShape.canvas?.requestRenderAll();
+                        }
+                    },
+                },
+            });
+        }, 0);
+    }, [selectedShape]);
+
+    useEffect(() => {
+        setTimeout(() => {
+            const container = document.getElementById("colorpicker_container4");
+            if(!container){
+                return;
+            }
+            container.innerHTML = "";
+            window.webix.ui({
+                view: "colorpicker",
+                container: "colorpicker_container4",
+                value: "#000000",
+                on: { 
+                    onChange: (newColor) => {
+                        setBorderColorInput(newColor);
+                        if(selectedShape){
+                            selectedShape.set("stroke", newColor);
+                            selectedShape.canvas?.requestRenderAll();
+                        }
+                    },
+                },
+            });
+        }, 0);
+    }, [selectedShape]);
+
     return(
         <div id = "whiteboard">
             <canvas id = "canvas" ref = {canvasRef}></canvas>
@@ -613,7 +663,7 @@ export default function WhiteBoard() {
                         </button>
                     </div>
                 )}
-                {/*Line break for sticky notes and textbox option*/}
+                {/*Line break for sticky notes and shapes option*/}
                 <button onClick = {() => {addTextbox(); setIsDrawing(false); setIsErasingStroke(false); setIsHighlighting(false)}}>
                     <img src = "text-Stroke-Rounded.png" alt = "text"/>
                 </button>
@@ -652,7 +702,7 @@ export default function WhiteBoard() {
                     </button>
                     <button onClick = {e => {
                         if(selectedTextbox){
-                            setFontSizeInput(Math.min(1, fontSizeInput - 3));
+                            setFontSizeInput(Math.max(1, fontSizeInput - 3));
                             selectedTextbox.set("fontSize", fontSizeInput);
                             selectedTextbox.canvas?.requestRenderAll();
                         }
@@ -720,6 +770,36 @@ export default function WhiteBoard() {
                         <img src = "text-align-right-Stroke-Rounded.png" alt = "text align right"/>
                     </button>
                 </div>
+            )}
+            {selectedShape && selectedGroup && (
+            <div id = "shapeEditingTools" style = {{left: `${menuPosition2.x}px`, top: `${menuPosition2.y}px`}}>
+            <button id = "colorpicker_container3"></button>
+            <button onClick = {e => {
+                if(selectedShape){
+                    setBorderSizeInput(Math.min(4, borderSizeInput + 1));
+                    selectedShape.set("strokeWidth", borderSizeInput);
+                    selectedShape.set("stroke", "#000000");
+                    selectedGroup.set("width", selectedShape.width + 2 * borderSizeInput);
+                    selectedGroup.set("height", selectedShape.height + 2 * borderSizeInput);
+                    selectedShape.canvas?.requestRenderAll();
+                }
+            }}>
+                <img src="add-square-Stroke-Rounded.png" alt="increase border size" />
+            </button>
+                <button onClick = {e => {
+                    if(selectedShape){
+                        setBorderSizeInput(Math.max(0, borderSizeInput - 1));
+                        selectedShape.set("strokeWidth", borderSizeInput);
+                        selectedShape.set("stroke", "#000000");
+                        selectedGroup.set("width", selectedShape.width + 2 * borderSizeInput);
+                        selectedGroup.set("height", selectedShape.height + 2 * borderSizeInput);
+                        selectedShape.canvas?.requestRenderAll();
+                    }
+                }}>
+                    <img src = "minus-square-Stroke-Rounded.png" alt = "decrease border size"></img>
+                </button>
+                <button id = "colorpicker_container4"></button>
+            </div>
             )}
             </div>
         </div>
