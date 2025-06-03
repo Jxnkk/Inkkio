@@ -472,6 +472,7 @@ export default function WhiteBoard() {
                     x: rect.left + rect.width / 2,
                     y: rect.top - 40
                 });
+                setFontSizeInput(obj.fontSize);
             } 
             else{
                 setSelectedTextbox(null);
