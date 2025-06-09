@@ -17,20 +17,20 @@
 }
 
 #editingTools {
-    top: 25%;
+    top: 45%;
     left: 20px;
 
 }
 
 #mainTools {
-    top: 5%;    
+    top: 30%;    
     left: 20px;
 }
 
 .floatingWidgets {
     top: 5%;
     right: 20px;
-    height: 85%;
+    height: 70%;
     width: 20%;
 }
 
