@@ -1,0 +1,119 @@
+#main-containers {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px; 
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#clock, #todo-list {
+    width: 95%;
+    border-radius: 10px;
+    padding: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#clock {
+    top: 0;
+}
+
+#todo-list {
+    top: 15%;
+}
+
+#clock {
+    background: #e6f0ff;
+}
+
+#todo-list {
+    background: #f6ffe6;
+}
+
+#time-input {
+    background: #fffbe6;      
+    border: 2px solid #7e9cff;
+    color: #222222;
+    border-radius: 8px;
+    padding: 0.5em 1em;
+    font-size: 1.1em;
+}
+
+#time {
+    background: #7e9cff;  
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5em 1.2em;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+#time:hover, #time:focus {
+    background: #4a6ee0;
+}
+
+#todo-list input {
+    background: #e6f7ff;     
+    border: 1.5px solid #bcd;
+    color: #222;
+    border-radius: 8px;
+    padding: 0.5em 1em;
+    font-size: 1em;
+    margin-right: 8px;
+}
+
+#todo-list button {
+    background: #8fd694;    
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5em 1.1em;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+    margin-right: 6px;
+}
+
+#todo-list button:last-child {
+    margin-right: 0;
+}
+
+#todo-items {
+    max-height: 180px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding-right: 4px;
+}
+
+.finished-todo-list {
+    max-height: 120px;
+    overflow-y: auto;
+    margin-top: 12px;
+    padding-right: 4px;
+}
+
+.todo-item.finished {
+    text-decoration: line-through;
+    color: #aaaaaa;
+    background: #f0f0f0;
+}
+
+ul {
+    padding-left: 0;
+    list-style: none;
+    margin-top: 18px;
+}
+
+li {
+    margin-bottom: 8px;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 6px 10px;
+}

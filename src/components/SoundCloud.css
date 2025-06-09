@@ -1,18 +1,42 @@
-.musicPlayer, .searchBox{
+.musicPlayer, .searchBox {
     background-color: #ffffff;
     box-shadow: 1px solid #ccc;
     border-radius: 4px;
 }
 
-.soundCloud{
+.soundCloud {
     display: block;
     padding: 10px;
 }
 
-.searchBox{
+.searchBox {
     height: 40%;
 }
 
-.musicPlayer{
-    height: 60%;
+#searchItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+#cover-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+#songInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 6px;
+}
+
+#searchList {
+    overflow-y: auto;
+    max-height: 400px;
+    padding-right: 4px;
 }

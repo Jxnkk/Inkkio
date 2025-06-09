@@ -15,7 +15,6 @@ export default function SoundCloud(){
 
     //API keys for Google Custom Search and Iframely
     const google_api_key = "AIzaSyBJcLNXS5KazHLCV2yjNkpaDGOGgdLuy-U";
-    const iframely_api_key = "367fc2e9522cccbe43d012";
     const google_cx = "c7b07b8214c624a79";
 
     //Take search query from user and search for it in the Google Custom Search API limiting only to SoundCloud links
@@ -45,20 +44,17 @@ export default function SoundCloud(){
         setSearchResults(trackLinks);
     }
 
-    //Fetchs and stores the embed code for the selected song using Iframely API
     async function getEmbedCode(chosenUrl){
         try {
-            const response = await axios.get("https://iframe.ly/api/iframely",{
+            const response = await axios.get("https://soundcloud.com/oembed",{
                 params: {
-                url: chosenUrl,
-                api_key: iframely_api_key
+                    format: "json",
+                    url: chosenUrl,
                 },
             });
-
-            console.log("Requested URL:", chosenUrl);
             const data = response.data;
-            const embedUrl = data.links.player[0].href;
-            console.log(embedUrl);
+            const match = data.html.match(/src="([^"]+)"/);
+            const embedUrl = match ? match[1] : "";
             setEmbedCode(embedUrl);
         }
         catch(error){
@@ -79,8 +75,8 @@ export default function SoundCloud(){
                 <input id = "searchText" value = {searchQuery} onChange = {e => updateSearchQuery(e.target.value)} placeholder = "Enter a song or playlist"></input>
                 {/*If search button is clicked, React will send searchQuery to Google Custom search API*/}
                 <button id = "searchButton" onClick = {getSearchQuery}> Search </button>
+                <br></br>
                 <div id = "searchResults">
-                    <h1> Search Results </h1>
                     {/*Outputs the search list out*/}
                     <div id = "searchList">
                         {searchResults.map((result, index) => (
@@ -98,9 +94,10 @@ export default function SoundCloud(){
                     </div>
                 </div>
             </div>
+            <br></br>
             {/*Calls SoundCloud widget API and changes the src of embed code depending on what user wants and defaults emebed code to a study music playlist*/}
-            <div className = "musicPlayer">
-                <iframe className = "soundcloud-player" src = {embedCode ? embedCode : "https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F222896338&show_artwork=true"} allowFullScreen/>
+            <div id = "musicPlayer">
+                <iframe id = "soundcloud-player" src = {embedCode ? embedCode : "https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F222896338&show_artwork=true"}/>
             </div>
         </div>
     )

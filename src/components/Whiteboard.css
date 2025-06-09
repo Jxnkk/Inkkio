@@ -40,8 +40,29 @@
     cursor: pointer;
 }
 
+#editingMenu, #shapesMenu {
+    position: absolute;
+    left: 100px;    
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 8px;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+#editingMenu {
+    top: 0px;
+}
+
+#shapesMenu {
+    top: 100px;
+}
+
 #textEditingTools, #shapeEditingTools {
-    position: fixed;
+    position: absolute;
     background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -50,5 +71,5 @@
     display: flex;
     gap: 10px;
     align-items: center;
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, 0);
 }
