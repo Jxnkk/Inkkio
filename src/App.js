@@ -6,7 +6,8 @@ import WhiteBoard from "./components/Whiteboard.js"
 export default function App() {
   return (
     <>
-      <WhiteBoard id = "whiteboard"/>
+      {/* Calling Whiteboard component */}
+      <WhiteBoard/>
     </>
   )
 }

@@ -5,19 +5,24 @@ import Clock from "./Clock.js";
 import SoundCloud from "./SoundCloud.js";   
 
 export default function WhiteBoard() {
+    //References to the canvas element and the Fabric.js canvas instance
     const canvasRef = useRef(null); 
     const fabricCanvasRef = useRef(null);
 
+    //State variables for what tool (draw, erase, highlight) and shape (square, circle, triangle, hexagon) is currently selected
     const [tool, setTool] = useState(null)
     const [shape, setShape] = useState(null);
     
+    //State variables for selected textbox, shape, and group
     const [selectedTextbox, setSelectedTextbox] = useState(null);
     const [selectedShape, setSelectedShape] = useState(null);
     const [selectedGroup, setSelectedGroup] = useState(null);
 
+    //State variables for stroke color and size for drawing and highlighting
     const [strokeColor, setStrokeColor] = useState("#000000");
     const [strokeSize, setStrokeSize] = useState(5);
 
+    //State variables for text or shape formatting options
     const [fontSizeInput, setFontSizeInput] = useState(6);
     const [bold, setBold] = useState(false);
     const [italic, setItalic] = useState(false);
@@ -28,6 +33,7 @@ export default function WhiteBoard() {
     const [backgroundColorInput, setBackgroundColorInput] = useState("#ffee8c");
     const [borderColorInput, setBorderColorInput] = useState("#000000");
 
+    //State variables for whether the editing menu, shapes menu, clock, or soundcloud is currently open
     const [isShapes, setIsShapes] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [menuPosition, setMenuPosition] = useState({x: 0, y: 0});
@@ -35,6 +41,7 @@ export default function WhiteBoard() {
     const [showSoundCloud, setShowSoundCloud] = useState(false);
     const [showClock, setClock] = useState(false);
 
+    //Initialize Fabric.js canvas and set up grid background with 2x zoom out
     useEffect(() => {
         const fabricCanvas = new Canvas(canvasRef.current, {
             isDrawingMode: false,
@@ -61,6 +68,7 @@ export default function WhiteBoard() {
         fabricCanvas.setZoom(1/2);
     }, []);
 
+    //Delete selected object when delete key is pressed
     useEffect(() => {
         function deleteObject(event){
             if(event.key === "Delete"){
@@ -77,6 +85,10 @@ export default function WhiteBoard() {
         return () => window.removeEventListener("keydown", deleteObject);
     }, []);
 
+    //Set up drawing, highlighting, and erasing functionality based on selected tool
+    //Draw -> pencil brush with selected color and size
+    //Highlight -> pencil brush with selected color at 30% opacity and 3x size
+    //Erase -> on mouse move, check if pointer is over any path or path-group objects and remove them
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
@@ -117,6 +129,9 @@ export default function WhiteBoard() {
         fabricCanvas.renderAll();
     }, [tool, strokeColor, strokeSize]);
 
+    //Set up adding shapes and textboxes to the canvas based on selected shape
+    //Textbox -> textbox with default text that can be edited on double click
+    //Square, Circle, Triangle, Hexagon, Pentagon -> shape with textbox inside that can be edited on double click
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
@@ -212,6 +227,7 @@ export default function WhiteBoard() {
         return () => fabricCanvas.off("mouse:down", addShape);
     }, [shape]);
 
+    //Set up double click to edit text inside textbox or shape group
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
@@ -240,6 +256,7 @@ export default function WhiteBoard() {
         return () => fabricCanvas.off("mouse:dblclick", setTextAndShape);
     }, []);
 
+    //Update menu position for selected textbox or shape when it is moved or selected
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
@@ -297,6 +314,7 @@ export default function WhiteBoard() {
         }
     }, []);
 
+    //Update selected textbox or shape formatting options when they are changed
     useEffect(() => {
         if(!selectedTextbox){
             return;
@@ -323,6 +341,7 @@ export default function WhiteBoard() {
 
     }, [selectedTextbox, fontSizeInput, bold, italic, underline, textAlignment]);
 
+    //Update selected shape formatting options when they are changed
     useEffect(() => {
         if(!selectedShape || !selectedGroup){
             return;
@@ -334,6 +353,7 @@ export default function WhiteBoard() {
 
     }, [selectedTextbox, selectedShape, borderSizeInput, selectedGroup])
 
+    //Set up pasting images from URL onto the canvas (Must be direct link to image file and not encrypted file)
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
         function handlePaste(event) {
@@ -365,6 +385,7 @@ export default function WhiteBoard() {
         return () => window.removeEventListener("paste", handlePaste);
     }, []);
 
+    //Set up color picker for stroke color for drawing and highlighting
     useEffect(() => {
         setTimeout(() => {
             const container = document.getElementById("colorpicker_container");
@@ -384,6 +405,7 @@ export default function WhiteBoard() {
         }, 0);
     }, [isEditing]);
 
+    //Set up color picker for stroke color for textbox text color
     useEffect(() => {
         setTimeout(() => {
             const container = document.getElementById("colorpicker_container2");
@@ -408,6 +430,7 @@ export default function WhiteBoard() {
         }, 0);
     }, [selectedTextbox]);
 
+    //Set up color picker for background color for shape fill color
     useEffect(() => {
         setTimeout(() => {
             const container = document.getElementById("colorpicker_container3");
@@ -432,6 +455,7 @@ export default function WhiteBoard() {
         }, 0);
     }, [selectedShape]);
 
+    //Set up color picker for border color for shape border color
     useEffect(() => {
         setTimeout(() => {
             const container = document.getElementById("colorpicker_container4");
@@ -456,6 +480,7 @@ export default function WhiteBoard() {
         }, 0);
     }, [selectedShape]);
 
+    //Convert canvas coordinates to screen coordinates for positioning menus (Generated by Copilot)
     function canvasToScreenCoords(canvas, point) {
         const zoom = canvas.getZoom();
         const vpt = canvas.viewportTransform;
@@ -465,6 +490,8 @@ export default function WhiteBoard() {
         };
     }
 
+    //Convert hex color to rgba color with specified alpha (Generated by Copilot)
+    //Used this to convert color into rgba because hex doesn't support opacity for highlighting
     function hexToRgba(hex, alpha = 1) {
         hex = hex.replace(/^#/, "");
         if (hex.length === 3) {
@@ -480,6 +507,7 @@ export default function WhiteBoard() {
     return(
         <div id = "whiteboard">
             <canvas id = "canvas" ref = {canvasRef}></canvas>
+            {/*Main tools: soundcloud and clock*/}
             <div id = "mainTools">
                 <button onClick = {() => setShowSoundCloud(!showSoundCloud)}>
                     <img src = "music-Stroke-Rounded.png"></img>
@@ -488,6 +516,7 @@ export default function WhiteBoard() {
                     <img src = "timer-Stroke-Rounded.png"></img>
                 </button>
             </div>
+            {/*When buttons in main tools are clicked, soundcloud and clock will appear*/}
             {showSoundCloud && (
                 <div className = "floatingWidgets">
                     <SoundCloud/>
@@ -498,6 +527,9 @@ export default function WhiteBoard() {
                     <Clock/>
                 </div>
             )}
+            {/*Editing tools: draw, erase, highlight, textbox, shapes*/}
+            {/*When editing button is clicked, editing menu will appear with draw, erase, highlight, and color picker*/}
+            {/*Editing menu changes value of tool to trigger draw, highlight, erase, brush size changes, and brush color changes*/}
             <div id = "editingTools">
                 <button onClick = {() => {setIsEditing(!isEditing)}}>
                     <img src = "editing-Stroke-Rounded.png"/>
@@ -522,6 +554,9 @@ export default function WhiteBoard() {
                         </button>
                     </div>
                 )}
+                {/*When textbox button is clicked, textbox will be added to canvas and textbox menu will appear*/}
+                {/*When shapes button is clicked, shapes menu will appear with square, circle, triangle, pentagon, and hexagon*/}
+                {/* Shapes menu changes value of shape to trigger adding shapes to canvas and shape formatting changes*/}
                 <button onClick = {() => setShape(shape === "textbox" ? null : "textbox")}>
                     <img src = "text-Stroke-Rounded.png" alt = "text"/>
                 </button>
@@ -547,6 +582,7 @@ export default function WhiteBoard() {
                         </button>
                     </div>
                 )}
+                {/* When textbox is selected, textbox menu will appear with font size, text color, bold, italic, underline, and text alignment*/}
                 {selectedTextbox && (
                 <div id = "textEditingTools" style = {{left: `${menuPosition.x}px`, top: `${menuPosition.y}px`}}>
                     <button onClick = {e => setFontSizeInput(Math.min(25, fontSizeInput + 3))}>
@@ -576,6 +612,7 @@ export default function WhiteBoard() {
                     </button>
                 </div>
             )}
+            {/* When shape is selected, shape menu will appear with border size, border color, and fill color*/}
             {selectedShape && selectedGroup && (
             <div id = "shapeEditingTools" style = {{left: `${menuPosition2.x}px`, top: `${menuPosition2.y}px`}}>
             <button id = "colorpicker_container3"></button>

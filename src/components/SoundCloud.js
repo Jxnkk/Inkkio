@@ -13,7 +13,7 @@ export default function SoundCloud(){
     //Stores the emebed code for the song user selected 
     const [embedCode, setEmbedCode] = useState("");
 
-    //API keys for Google Custom Search and Iframely
+    //API keys for Google Custom Search 
     const google_api_key = "AIzaSyBJcLNXS5KazHLCV2yjNkpaDGOGgdLuy-U";
     const google_cx = "c7b07b8214c624a79";
 
@@ -44,6 +44,7 @@ export default function SoundCloud(){
         setSearchResults(trackLinks);
     }
 
+    //Takes the URL of the song user selected and sends it to SoundCloud oEmbed API to get the embed code
     async function getEmbedCode(chosenUrl){
         try {
             const response = await axios.get("https://soundcloud.com/oembed",{
@@ -77,7 +78,7 @@ export default function SoundCloud(){
                 <button id = "searchButton" onClick = {getSearchQuery}> Search </button>
                 <br></br>
                 <div id = "searchResults">
-                    {/*Outputs the search list out*/}
+                    {/*Outputs the search list out with image of the song cover and song title that when clicks will update song choice*/}
                     <div id = "searchList">
                         {searchResults.map((result, index) => (
                         <div key = {index} id = "searchItem">
