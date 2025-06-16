@@ -1,36 +1,58 @@
-#main-containers {
+/*Main container for the clock and todo list only takes 85% of height and orders items inside it vertically*/
+#mainContainers {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
     flex-direction: column;
     gap: 20px; 
     width: 100%;
+    height: 85%;
     box-sizing: border-box;
 }
 
-#clock, #todo-list {
+/*Clock and Todo list take 95% width and are rounded rectangles with a gap between them vertically*/
+#clock, #todoList, #finishedTodos {
     width: 95%;
     border-radius: 10px;
     padding: 10px;
-    background: #ffffff;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
+/*Clock is at the top*/
 #clock {
     top: 0;
+    height: 25%;
 }
 
-#todo-list {
+/*Todo list is below the clock with slightly bigger height to fit for the tasks*/
+#todoList {
     top: 15%;
+    height: 35%;
 }
 
+/*finishedTodo is below the todo list and takes the remaining height available*/
+#finishedTodos {
+    top: 40%;
+    height: 35%
+}
+
+/*Make the list of todos and finished todos scrollable if it overflows*/
+#todos, #fTodos {
+    overflow-y: auto;
+}
+
+/*Specific background colors for clock*/
 #clock {
     background: #e6f0ff;
 }
 
-#todo-list {
+/*Specific background color for todo list*/
+#todoList {
     background: #f6ffe6;
 }
+
+#finishedTodos {
+    background: #f0f0f0;
+}
+

@@ -17,8 +17,9 @@ export default function SoundCloud(){
     const google_api_key = "AIzaSyBJcLNXS5KazHLCV2yjNkpaDGOGgdLuy-U";
     const google_cx = "c7b07b8214c624a79";
 
-    //Take search query from user and search for it in the Google Custom Search API limiting only to SoundCloud links
-    //Then, filter the results to only include SoundCloud tracks by checking the URL structure
+    /*Take put the search query into the Google Custom Search API and limit results to only to SoundCloud links
+    Then, filter the 10 results to only include SoundCloud track links by checking for 5 "/" in the URL so it's only tracks or playlists and not artist pages
+    Save the filtered results to searchResults*/
     async function getSearchQuery(){
         const response = await axios.get("https://www.googleapis.com/customsearch/v1", {
         params: {
@@ -44,9 +45,11 @@ export default function SoundCloud(){
         setSearchResults(trackLinks);
     }
 
-    //Takes the URL of the song user selected and sends it to SoundCloud oEmbed API to get the embed code
+    /*Takes the URL of the song user selected and sends it to SoundCloud oEmbed API to get the embed code
+    Then, extract the src from the embed code and save it to embedCode 
+    If there isn't a src, set embedCode to an empty string*/
     async function getEmbedCode(chosenUrl){
-        try {
+        try{
             const response = await axios.get("https://soundcloud.com/oembed",{
                 params: {
                     format: "json",
@@ -59,7 +62,7 @@ export default function SoundCloud(){
             setEmbedCode(embedUrl);
         }
         catch(error){
-        console.error("Error fetching embed code:", error);
+            console.error("Error fetching embed code:", error);
         }
     };
 
@@ -70,7 +73,7 @@ export default function SoundCloud(){
 
     return(
         <div id = "soundCloud">
-            {/*Searchbox that holds text box, search button, and results*/}
+            {/*Searchbox holds text box, search button, and results*/}
             <div id = "searchBox">
                 {/*Everytime text inside searchText changes, searchQuery is updated*/}
                 <input id = "searchText" value = {searchQuery} onChange = {e => updateSearchQuery(e.target.value)} placeholder = "Enter a song or playlist"></input>
@@ -78,7 +81,7 @@ export default function SoundCloud(){
                 <button id = "searchButton" onClick = {getSearchQuery}> Search </button>
                 <br></br>
                 <div id = "searchResults">
-                    {/*Outputs the search list out with image of the song cover and song title that when clicks will update song choice*/}
+                    {/*Outputs the search list out with image of the song cover and song title*/}
                     <div id = "searchList">
                         {searchResults.map((result, index) => (
                         <div key = {index} id = "searchItem">
@@ -88,7 +91,8 @@ export default function SoundCloud(){
                                 id = "cover-image"
                             />
                             <div id = "songInfo">
-                                <a href = {result.link} target = "_blank" rel = "noopener noreferrer" onClick = {e => {e.preventDefault(); getEmbedCode(result.link);}}> {result.title} </a>
+                                {/*When user clicks on the song title, it will call getEmbedCode with the link of the song*/}
+                                <a href = {result.link} target = "_blank" rel = "noopener noreferrer" onClick = {e => {getEmbedCode(result.link);}}> {result.title} </a>
                             </div>
                         </div>
                         ))}

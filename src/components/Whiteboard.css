@@ -23,14 +23,14 @@
 }
 
 #mainTools {
-    top: 30%;    
+    top: 25%;
     left: 20px;
 }
 
 .floatingWidgets {
     top: 5%;
     right: 20px;
-    height: 70%;
+    height: 85%;
     width: 20%;
 }
 

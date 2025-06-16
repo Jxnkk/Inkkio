@@ -1,14 +1,14 @@
+/*Entire sound cloud component should take only 85% height*/
+.soundCloud {
+    height: 85%;
+}
+
+/*Make both the music player and search box take full width*/
 .musicPlayer, .searchBox {
-    background-color: #ffffff;
-    box-shadow: 1px solid #ccc;
-    border-radius: 4px;
     width: 100%;
 }
 
-.soundCloud {
-    display: block;
-}
-
+/*Make each search item have a consistent height and gap between them vertically*/
 #searchItem {
     display: flex;
     align-items: center;
@@ -16,10 +16,7 @@
     margin-bottom: 10px;
 }
 
-#searchText {
-    margin-bottom: 10px;
-}
-
+/*Make the cover a small square with rounded corners*/
 #cover-image {
     width: 40px;
     height: 40px;
@@ -28,6 +25,7 @@
     flex-shrink: 0;
 }
 
+/*Make the information of each song have consistent gap between the cover and title horizontally*/
 #songInfo {
     display: flex;
     flex-direction: column;
@@ -35,13 +33,15 @@
     margin-left: 6px;
 }
 
+/*Make the searchList scrollable with a fixed height*/
 #searchList {
-    overflow-y: auto;
     padding-right: 4px;
-    height: 60%;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
+/*Make the soundcloud player take full width and height*/
 #soundcloud-player {
     width: 100%;
-    height: 100%;
+    height: 30%;
 }
