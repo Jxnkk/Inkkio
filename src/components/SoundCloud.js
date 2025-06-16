@@ -92,7 +92,7 @@ export default function SoundCloud(){
                             />
                             <div id = "songInfo">
                                 {/*When user clicks on the song title, it will call getEmbedCode with the link of the song*/}
-                                <a href = {result.link} target = "_blank" rel = "noopener noreferrer" onClick = {e => {getEmbedCode(result.link);}}> {result.title} </a>
+                                <a href = {result.link} target = "_blank" rel = "noopener noreferrer" onClick = {e => {e.preventDefault(); getEmbedCode(result.link);}}> {result.title} </a>
                             </div>
                         </div>
                         ))}
