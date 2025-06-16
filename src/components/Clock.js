@@ -47,9 +47,9 @@ export default function Clock() {
     If minutes is less than 10, add a leading 0
     If seconds is less than 10, add a leading 0
     Return the formatted time as a string*/
-    function formatTime(sec){
-        const minutes = Math.floor(sec / 60);
-        const seconds = sec % 60;
+    function formatTime(){
+        const minutes = Math.floor(seconds / 60);
+        const sec = seconds % 60;
         let minStr, secStr;
 
         if (minutes < 10){
@@ -60,10 +60,10 @@ export default function Clock() {
         }
 
         if(seconds < 10){
-            secStr = "0" + seconds;
+            secStr = "0" + sec;
         } 
         else{
-            secStr = "" + seconds;
+            secStr = "" + sec;
         }
         return minStr + ":" + secStr;
     }
@@ -109,7 +109,7 @@ export default function Clock() {
                     <button onClick = {handleSet} id = "time"> Set </button>
                 </div>
                 {/*Display the time in mm:ss format*/}
-                <div> {formatTime(seconds)} </div>
+                <div> {formatTime()} </div>
                 {/*Start/Pause button toggles running state, Reset button sets seconds to 0 and running to false*/}
                 <button onClick = {() => {setRunning(!running); setLastDoneTime(Date.now());}} disabled = {seconds === 0}>
                     {running ? "Pause" : "Start"}
@@ -126,6 +126,7 @@ export default function Clock() {
                 <button onClick = {() => {setTodos([]); setFinishedTodos([])}}> Clear All </button>
                 <div id = "todos">
                     {/*Display the list of todos and those on the finishedTodos as striked through*/}
+                    {/*When an item is clicked, the index value of it will be sent to removeTodo()*/}
                     {todos.map((todo, idx) => (
                         <div
                             key = {idx}

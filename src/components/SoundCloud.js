@@ -31,11 +31,9 @@ export default function SoundCloud(){
 
         const allResults = response.data.items;
         const trackLinks = [];
-        console.log("Search Results:", allResults);
 
-        for (const item of allResults){
+        for(const item of allResults){
             const url = item.link;
-            console.log(item);
             const splitURL = url.split("/");
             if(splitURL.length >= 5){
                 trackLinks.push(item);
@@ -65,18 +63,13 @@ export default function SoundCloud(){
             console.error("Error fetching embed code:", error);
         }
     };
-
-    //Updates the search query state when user types in the search box
-    function updateSearchQuery(newSearchQuery){
-        setSearchQuery(newSearchQuery);
-    }
-
+    
     return(
         <div id = "soundCloud">
             {/*Searchbox holds text box, search button, and results*/}
             <div id = "searchBox">
                 {/*Everytime text inside searchText changes, searchQuery is updated*/}
-                <input id = "searchText" value = {searchQuery} onChange = {e => updateSearchQuery(e.target.value)} placeholder = "Enter a song or playlist"></input>
+                <input id = "searchText" value = {searchQuery} onChange = {e => setSearchQuery(e.target.value)} placeholder = "Enter a song or playlist"></input>
                 {/*If search button is clicked, React will send searchQuery to Google Custom search API*/}
                 <button id = "searchButton" onClick = {getSearchQuery}> Search </button>
                 <br></br>
