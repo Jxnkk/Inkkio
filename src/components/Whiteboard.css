@@ -1,9 +1,11 @@
+/*Puts canvas to full width and height of screen*/
 #canvas {
     display: block;
     width: 100%;
     height: 100%;
 }
 
+/*Makes editingTools, mainTools, floatingWidgets appear as white rounded rectangles*/
 #editingTools, #mainTools, .floatingWidgets {
     position: fixed; 
     display: flex;
@@ -16,17 +18,20 @@
     z-index: 2;
 }
 
+/*Position editingTools to left and high up on screen*/
+#mainTools {
+    top: 25%;
+    left: 20px;
+}
+
+/*Position editingTools to left and slightly below mainTools*/
 #editingTools {
     top: 45%;
     left: 20px;
 
 }
 
-#mainTools {
-    top: 25%;
-    left: 20px;
-}
-
+/*Position floatingWidgets to right and take up most of screen height*/
 .floatingWidgets {
     top: 5%;
     right: 20px;
@@ -34,12 +39,7 @@
     width: 20%;
 }
 
-#editingTools button, #mainTools button {
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
+/*Position editingMenu and shapesMenu as rounded rectangles to the right of their respective buttons that trigger them to appear*/
 #editingMenu, #shapesMenu {
     position: absolute;
     left: 100px;    
@@ -53,14 +53,17 @@
     gap: 10px;
 }
 
+/*Position editingMenu*/
 #editingMenu {
     top: 0px;
 }
 
+/*Position shapesMenu*/
 #shapesMenu {
     top: 100px;
 }
 
+/*Position textEditingTools and shapeEditingTools as rounded rectangles to near their respective textboxes and shapes*/
 #textEditingTools, #shapeEditingTools {
     position: absolute;
     background: #ffffff;

@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
+//Connecting to css file for styling 
 import "./Clock.css";
 
 export default function Clock() {
-    //Input is the time user inputs in the text box in format mm:ss
+    //The time user inputs in the text box in format mm:ss
     const [input, setInput] = useState(""); 
-    //Seconds is converted from user input to just seconds 
+    //Converted from user input to just seconds 
     const [seconds, setSeconds] = useState(0);
-    //Running is whether the timer is currently running or not
+    //Whether the timer is currently running or not
     const [running, setRunning] = useState(false);
-    //Todos is the list of tasks user inputs
+    //List of tasks user inputs
     const [todos, setTodos] = useState([]);
-    //todoInput is the current task user is typing in the text box
+    //Current task user is typing in the text box
     const [todoInput, setTodoInput] = useState("");
-    //finishedTodos is the list of tasks user has completed
+    //List of tasks user has completed
     const [finishedTodos, setFinishedTodos] = useState([]);
-    //lastDoneTime is the last time user completed a task (Set to the start time of the timer when timer is started)
+    //The last time user completed a task (Set to the start time of the timer when timer is started)
     const [lastDoneTime, setLastDoneTime] = useState(Date.now());
 
     /*Updates the timer every second if running is true and seconds is greater than 0

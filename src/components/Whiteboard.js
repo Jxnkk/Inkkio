@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef } from "react";
+//Importing components from Fabric.js for canvas manipulation
 import { Canvas, PencilBrush, Textbox, Rect, Group, Circle, Triangle, Polygon, FabricImage } from "fabric";
+//Connecting to css file for styling
 import "./Whiteboard.css";          
+//Importing clock and soundcloud components to add to the whiteboard
 import Clock from "./Clock.js";
 import SoundCloud from "./SoundCloud.js";   
 
@@ -41,7 +44,10 @@ export default function WhiteBoard() {
     const [showSoundCloud, setShowSoundCloud] = useState(false);
     const [showClock, setClock] = useState(false);
 
-    //Initialize Fabric.js canvas and set up grid background with 2x zoom out
+    /*Initializes a Fabric.js canvas instance when the canvas element is mounted
+
+    Adds a grid of small, gray dots to the canvas to help user with alignment 
+    (Canvas is set to 2x the size of the window for better resolution*/
     useEffect(() => {
         const fabricCanvas = new Canvas(canvasRef.current, {
             isDrawingMode: false,
@@ -68,7 +74,10 @@ export default function WhiteBoard() {
         fabricCanvas.setZoom(1/2);
     }, []);
 
-    //Delete selected object when delete key is pressed
+    /*Listens for when delete key is pressed and will delete any item selected on the canvas by checking if there is an active object
+    
+    If there is an active object, it will remove it from the canvas and discard the active object
+    If there isn't an active object, it will do nothing*/
     useEffect(() => {
         function deleteObject(event){
             if(event.key === "Delete"){
@@ -81,14 +90,55 @@ export default function WhiteBoard() {
                     }
                 }
             }
+
         window.addEventListener("keydown", deleteObject);
         return () => window.removeEventListener("keydown", deleteObject);
     }, []);
 
-    //Set up drawing, highlighting, and erasing functionality based on selected tool
-    //Draw -> pencil brush with selected color and size
-    //Highlight -> pencil brush with selected color at 30% opacity and 3x size
-    //Erase -> on mouse move, check if pointer is over any path or path-group objects and remove them
+    /*Listens for copy and paste events to copy and paste selected objects on the canvas
+
+    When something is pasted, it'll check if the pasted content is an image URL (Doesn't working for encrypted images)
+    If pasted content is an image URL, it will create a Fabric.js image object from the URL and add it to the canvas
+    The image will be centered on the canvas and scaled down to 50% of its original size
+    */
+    useEffect(() => {
+        const fabricCanvas = fabricCanvasRef.current;
+        function handlePaste(event) {
+            const pastedText = event.clipboardData.getData("text");
+            if(!pastedText){
+                return;
+            }
+            const imageUrlPattern = /(https?:\/\/.*\.(gif|webp|png|jpg|jpeg|svg))/i;
+            if(imageUrlPattern.test(pastedText)){
+                FabricImage.fromURL(pastedText)
+                    .then(img => {
+                        console.log("Loaded image:", img);
+                        img.set({
+                            left: fabricCanvas.width / 2,
+                            top: fabricCanvas.height / 2,
+                            originX: "center",
+                            originY: "center",
+                            scaleX: 0.5,
+                            scaleY: 0.5,
+                        });
+                        fabricCanvas.add(img);
+                        fabricCanvas.setActiveObject(img);
+                        fabricCanvas.requestRenderAll();
+                    }
+                )
+            }
+        }
+        
+        window.addEventListener("paste", handlePaste);
+        return () => window.removeEventListener("paste", handlePaste);
+    }, []);
+
+    /*Sets up drawing, highlighting, and erasing tools on the canvas based on selected tool
+
+    If the tool is "draw", it will set the brush to a pencil brush with the selected stroke color and size
+    If the tool is "highlight", it will be the same as the pencil but the stroke size will be 3 times bigger and the color will be set to a transparent version of the stroke color
+    If the tool is "erase", it will disable drawing mode and set up an event listener to erase objects on the canvas when the mouse is moved
+    If the tool is not set, it will disable drawing mode*/
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
@@ -129,9 +179,11 @@ export default function WhiteBoard() {
         fabricCanvas.renderAll();
     }, [tool, strokeColor, strokeSize]);
 
-    //Set up adding shapes and textboxes to the canvas based on selected shape
-    //Textbox -> textbox with default text that can be edited on double click
-    //Square, Circle, Triangle, Hexagon, Pentagon -> shape with textbox inside that can be edited on double click
+    /*Adds different shapes to the canvas depending on the selected shape
+
+    If shape isn't null, it will create the corresponding shape on mouse down event
+    If the shape is "textbox", it will add a textbox to the canvas and set it as the active object
+    If the shape is "square", "circle", "triangle", "hexagon", or "pentagon", it will create the shape and then group it with a textbox in the center*/
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
@@ -227,11 +279,15 @@ export default function WhiteBoard() {
         return () => fabricCanvas.off("mouse:down", addShape);
     }, [shape]);
 
-    //Set up double click to edit text inside textbox or shape group
+    /*Sets up double click event listener to edit textboxes
+
+    When a textbox or a textbox inside a group is double clicked, it will set the selectedTextbox to that textbox 
+    It will also enter editing mode for the textbox to be modified 
+    */
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
-        function setTextAndShape(event) {
+        function setText(event) {
             const target = event.target;
 
             if(target.type === "textbox"){
@@ -252,11 +308,16 @@ export default function WhiteBoard() {
             }
         }
 
-        fabricCanvas.on("mouse:dblclick", setTextAndShape);
-        return () => fabricCanvas.off("mouse:dblclick", setTextAndShape);
+        fabricCanvas.on("mouse:dblclick", setText);
+        return () => fabricCanvas.off("mouse:dblclick", setText);
     }, []);
 
-    //Update menu position for selected textbox or shape when it is moved or selected
+    /*Sets up selection and editing of textbox 
+
+    When a textbox or a textbox inside a shape group is selected, it will set the selectedTextbox state and position the editing menu
+    When a shape group is selected, it will set the selectedShape and selectedGroup state and position the shape editing menu
+    If no textbox or shape is selected, it will reset the selectedTextbox, selectedShape, and selectedGroup state
+    */
     useEffect(() => {
         const fabricCanvas = fabricCanvasRef.current;
 
@@ -314,7 +375,14 @@ export default function WhiteBoard() {
         }
     }, []);
 
-    //Update selected textbox or shape formatting options when they are changed
+    /*Updates selected textbox based on formatting options when they are changed
+
+    If selectedTextbox is null, it will do nothing
+    If bold is true, it will set the fontWeight to "bold", otherwise it will set it to "normal"
+    If italic is true, it will set the fontStyle to "italic", otherwise it will set it to "normal"
+    If underline is true, it will set the underline property to true, otherwise it will set it to false
+    It will also set the fontSize and textAlign properties based on the state variables
+    Finally, it will request a render of the canvas to update the changes*/
     useEffect(() => {
         if(!selectedTextbox){
             return;
@@ -341,7 +409,12 @@ export default function WhiteBoard() {
 
     }, [selectedTextbox, fontSizeInput, bold, italic, underline, textAlignment]);
 
-    //Update selected shape formatting options when they are changed
+    /*Sets up selected shape based on formatting options when they are changed
+
+    If selectedShape is null, it will do nothing
+    It will set the fill, stroke, strokeWidth properties based on the state variables
+    It will also set the width and height of the selected group based on the shape's dimensions and border size
+    Finally, it will request a render of the canvas to update the changes*/
     useEffect(() => {
         if(!selectedShape || !selectedGroup){
             return;
@@ -352,38 +425,6 @@ export default function WhiteBoard() {
         selectedShape.canvas.requestRenderAll();
 
     }, [selectedTextbox, selectedShape, borderSizeInput, selectedGroup])
-
-    //Set up pasting images from URL onto the canvas (Must be direct link to image file and not encrypted file)
-    useEffect(() => {
-        const fabricCanvas = fabricCanvasRef.current;
-        function handlePaste(event) {
-            const pastedText = event.clipboardData.getData("text");
-            if(!pastedText){
-                return;
-            }
-            const imageUrlPattern = /(https?:\/\/.*\.(gif|webp|png|jpg|jpeg|svg))/i;
-            if(imageUrlPattern.test(pastedText)){
-                FabricImage.fromURL(pastedText)
-                    .then(img => {
-                        console.log("Loaded image:", img);
-                        img.set({
-                            left: fabricCanvas.width / 2,
-                            top: fabricCanvas.height / 2,
-                            originX: "center",
-                            originY: "center",
-                            scaleX: 0.5,
-                            scaleY: 0.5,
-                        });
-                        fabricCanvas.add(img);
-                        fabricCanvas.setActiveObject(img);
-                        fabricCanvas.requestRenderAll();
-                    }
-                )
-            }
-        }
-        window.addEventListener("paste", handlePaste);
-        return () => window.removeEventListener("paste", handlePaste);
-    }, []);
 
     //Set up color picker for stroke color for drawing and highlighting
     useEffect(() => {
