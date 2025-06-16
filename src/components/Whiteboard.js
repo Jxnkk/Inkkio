@@ -424,7 +424,7 @@ export default function WhiteBoard() {
         selectedGroup.set("height", selectedShape.height + 2 * borderSizeInput);
         selectedShape.canvas.requestRenderAll();
 
-    }, [selectedTextbox, selectedShape, borderSizeInput, selectedGroup])
+    }, [selectedShape, borderSizeInput, selectedGroup])
 
     //Set up color picker for stroke color for drawing and highlighting
     useEffect(() => {
